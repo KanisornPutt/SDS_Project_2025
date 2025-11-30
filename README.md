@@ -3,7 +3,7 @@
 This application is a multi-service system designed to convert Jupyter Notebook files (.ipynb) into PDF documents through a sequential processing pipeline. It separates each major task into its own service to improve modularity, scalability, and maintainability.
 
 ### Main Purpose
-The core purpose of this application is to:
+The purposes of this application is to:
 - Allow users to upload any Jupyter Notebook (.ipynb) file
 - Convert the uploaded file into HTML
 - Convert the HTML output into a downloadable PDF file
