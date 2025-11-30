@@ -3,17 +3,18 @@
 This application is a multi-service system designed to convert Jupyter Notebook files (.ipynb) into PDF documents through a sequential processing pipeline. It separates each major task into its own service to improve modularity, scalability, and maintainability.
 
 ### Main Purpose
-- The core purpose of this application is to:
-- Let users upload a Jupyter Notebook file
-- Automatically convert it to HTML
-- Then convert the HTML into a downloadable PDF
+The core purpose of this application is to:
+- Allow users to upload any Jupyter Notebook (.ipynb) file
+- Convert the uploaded file into HTML
+- Convert the HTML output into a downloadable PDF file
 
-This is helpful for:
+
+Which is useful for:
 - Submitting assignments
 - Sharing reports
 - Archiving notebooks in a portable format
 
-# How to Run on a Cluster
+# How to Run services on Cluster
 
 ## Flash the Raspberri Pis
 
@@ -21,7 +22,7 @@ set the Pi's names to `sds01 - sds04`
 
 ## Init Cluster
 
-Prepare your private key at `../key`
+Provide your private key at `../key`
 
 ```shell
 cd k3s-ansible
@@ -29,7 +30,7 @@ ansible-playbook -i ../inventory.yml playbooks/site.yml
 ```
 
 ## Patch the Cluster 
-so core sercives run on the control plane,
+To ensure that core services will run on the control plane,
 
 on the master node 
 ```sh
@@ -37,8 +38,8 @@ chmod +X patch.sh
 ./patch.sh
 ```
 
-## Copy the Images of the Services to the PIs
-so container creation takes less time 
+## Copy Image of the Services to PIs
+To reduce container's building time 
 
 ```sh
 ansible -i inventory.yml agent -m file -a "path=/var/lib/rancher/k3s/agent/images/ mode=0755 state=directory owner=root group=root" -b
