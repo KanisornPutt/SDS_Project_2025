@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80" 
+    depends_on:
+      - gateway
+    
+  gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - IPYNB_SERVICE=http://ipynb-converter:5001
+      - PDF_SERVICE=http://pdf-converter:8080
+    depends_on:
+      - ipynb-converter
+      - pdf-converter
+    
+  ipynb-converter:
+    build:
+      context: ./ipynb-html
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+
+  pdf-converter:
+    build:
+      context: ./html-pdf
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"

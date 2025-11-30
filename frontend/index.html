@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IPYNB Converter</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+
+  <body
+    class="bg-[#FBF8E9] w-full h-screen p-3 flex flex-col justify-center items-center gap-10 font-[Inter]"
+  >
+    <div class="flex flex-col justify-center items-center">
+      <h1 class="text-3xl font-semibold">IPYNB to PDF Converter</h1>
+      <h3 class="font-medium">
+        Easily convert files from one format to another, online.
+      </h3>
+    </div>
+
+    <div
+      id="upload-box"
+      class="bg-rose-100 flex flex-col justify-center items-center gap-5 px-12 py-10 rounded-lg border-2 border-dashed border-yellow-900 transition-all duration-200"
+    >
+      <i id="cloud-upload" data-lucide="cloud-upload"></i>
+
+      <div id="upload-text" class="flex flex-col justify-center items-center">
+        <h3 class="font-semibold">Choose a .ipynb file from your device</h3>
+        <p class="text-sm font-medium opacity-50">Max file size up to 5 MB</p>
+      </div>
+
+      <!-- hidden file input -->
+      <input type="file" id="file-input" accept=".ipynb" class="hidden" />
+
+      <button
+        id="browse-btn"
+        class="bg-white border-[1.5px] border-yellow-700 px-3 py-1 rounded-md font-semibold hover:bg-red-50 hover:border-yellow-900 active:bg-red-100 active:border-yellow-950 transition duration-150"
+      >
+        Browse File
+      </button>
+    </div>
+
+    <div
+      class="flex flex-row gap-45 hidden transition-all duration-200"
+      id="convert-group"
+    >
+      <div
+        class="flex justify-center items-center bg-white px-3 border rounded-full"
+      >
+        ?
+      </div>
+      <div>
+        <button
+          id="cancel"
+          class="bg-slate-100 font-semibold px-3 py-1 border-[1.5px] border-yellow-900/40 rounded-lg hover:bg-slate-200 active:bg-slate-300"
+        >
+          Cancel
+        </button>
+        <button
+        id="convert"
+          class="bg-rose-200 font-semibold px-3 py-1 border-[1.5px] border-yellow-900/40 rounded-lg
+          hover:bg-rose-300 active:bg-rose-400"
+        >
+          Convert
+        </button>
+        <button
+        id="add"
+          class="bg-rose-200 font-semibold px-3 py-1 border-[1.5px] border-yellow-900/40 rounded-lg hidden
+          hover:bg-rose-300 active:bg-rose-400"
+        >
+          Add new file
+        </button>
+      </div>
+    </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+    </script>
+    <script src="scripts/fileUpload.js"></script>
+  </body>
+</html>
