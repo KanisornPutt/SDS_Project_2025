@@ -1,4 +1,61 @@
-# How to Run
+# Application Overview — IPYNB to PDF Converter
+
+This application is a multi-service system designed to convert Jupyter Notebook files (.ipynb) into PDF documents through a sequential processing pipeline. It separates each major task into its own service to improve modularity, scalability, and maintainability.
+
+### Main Purpose
+- The core purpose of this application is to:
+- Let users upload a Jupyter Notebook file
+- Automatically convert it to HTML
+- Then convert the HTML into a downloadable PDF
+
+This is helpful for:
+- Submitting assignments
+- Sharing reports
+- Archiving notebooks in a portable format
+
+# How to Run on a Cluster
+
+## Flash the Raspberri Pis
+
+set the Pi's names to sds01 - sds04
+
+## Inventory.init
+
+```...```
+
+## Init Cluster
+
+```ansible ...```
+
+## Patch the Cluster 
+so core sercives run on the control plane,
+
+on the master node 
+```sh
+chmod +X patch.sh
+./patch.sh
+```
+
+## Copy the Images of the Services to the PIs
+so container creation takes less time 
+
+```sh
+ansible -i inventory.yml agent -m file -a "path=/var/lib/rancher/k3s/agent/images/ mode=0755 state=directory owner=root group=root" -b
+ansible -i inventory.yml agent -m copy -a "src=/var/lib/rancher/k3s/agent/images/img.tar.gz dest=/var/lib/rancher/k3s/agent/images/ mode=0644 owner=root group=root" -b
+ansible -i inventory.yml agent -m unarchive -a "remote_src=yes src=/var/lib/rancher/k3s/agent/images/img.tar.gz dest=/var/lib/rancher/k3s/agent/images/ mode=0644 owner=root group=root" -b
+ansible -i inventory.yml agent -m file -a "path=/var/lib/rancher/k3s/agent/images/img.tar.gz state=absent" -b
+ansible -i inventory.yml agent -m systemd -a "name=k3s-agent state=restarted" -b
+```
+
+## Apply Manifest File
+
+on the master node 
+
+```sh
+kubectl apply -f manifest.yaml
+```
+
+# How to Run Locally
 
 ## Using Docker Compose 
 ```bash
