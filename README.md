@@ -1,13 +1,20 @@
 ## How to Run
 
+## Using Docker Compose 
+```bash
+# Start all services
+docker-compose up --build
+
+# Access the frontend at http://localhost
+```
+
 ## Run Locally (for development)
 
 **Create and activate a venv**
-for frontend and HTML service
+for frontend and html service
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install flask fastapi uvicorn httpx
 ```
 
 **Terminal 1 - Frontend:**
@@ -19,28 +26,24 @@ python -m http.server 8000
 
 **Terminal 2 - API Gateway:**
 ```bash
-cd api_gateway
-python3 main.py 
+cd api-gateway
+npm install
+node gateway.js
 ```
 
-**Terminal 3 - MD Parser:**
+**Terminal 3 - IPYNB Converter:**
 ```bash
-cd md_parser
-npm i 
-node server.js
+cd ipynb-html
+pip install -r requirements.txt
+# Use 1 worker for simplicity, or 2-4 for better performance
+gunicorn --bind 0.0.0.0:5000 --workers 2 wsgi:app
 ```
 
-**Terminal 4 - HTML Templater Service:**
+**Terminal 4 - PDF Service:**
 ```bash
-cd html_templater
-python3 main.py
-```
-
-
-**Terminal 5 - PDF Renderor Service:**
-```bash
-cd pdf_renderer
-python3 main.py
+cd html-pdf
+# Install wkhtmltopdf first: apt-get install wkhtmltopdf (Linux) or brew install wkhtmltopdf (Mac)
+go run pdf_service.go
 ```
 
 ## Architecture Overview
