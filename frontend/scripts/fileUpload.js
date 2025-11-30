@@ -10,7 +10,7 @@ const addButton = document.getElementById("add");
 const convertButton = document.getElementById("convert");
 
 // API Gateway URL - change this to your gateway address
-const API_GATEWAY = 'http://localhost:3000';
+const API_GATEWAY = '/api';
 
 // Store the current file
 let currentFile = null;
@@ -199,8 +199,9 @@ convertButton.addEventListener("click", async () => {
     
     // Show convert button again to retry
     convertButton.classList.remove("hidden");
-    
-    alert(`Conversion failed: ${error.message}\n\nMake sure the API Gateway is running at ${API_GATEWAY}`);
+
+    alert(`Conversion failed: ${error.message}\n`);
+    console.log(`Make sure the API Gateway is running at ${API_GATEWAY}`);
   }
 });
 
