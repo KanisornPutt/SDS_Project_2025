@@ -19,13 +19,14 @@ This is helpful for:
 
 set the Pi's names to `sds01 - sds04`
 
-## Inventory.init
-
-```...```
-
 ## Init Cluster
 
-```ansible ...```
+Prepare your private key at `../key`
+
+```shell
+cd k3s-ansible
+ansible-playbook -i ../inventory.yml playbooks/site.yml
+```
 
 ## Patch the Cluster 
 so core sercives run on the control plane,
