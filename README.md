@@ -17,7 +17,7 @@ This is helpful for:
 
 ## Flash the Raspberri Pis
 
-set the Pi's names to sds01 - sds04
+set the Pi's names to `sds01 - sds04`
 
 ## Inventory.init
 
