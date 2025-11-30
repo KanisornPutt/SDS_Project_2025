@@ -1,5 +1,5 @@
 ---
-# Namespace (optional, but recommended)
+# Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -21,19 +21,51 @@ spec:
     metadata:
       labels:
         app: pdf-converter
+        project: sds-demo    # <--- NEW: Shared label for spreading
     spec:
+      nodeSelector:
+        node-type: worker
+      tolerations:
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              project: sds-demo # <--- NEW: Looks for ANY project pod
       containers:
-      - name: pdf-converter
-        image: kanisornp/sds-project-pdf-renderer:1.1
-        ports:
-        - containerPort: 8080
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: pdf-converter
+          image: kanisornp/sds-project-pdf-renderer:1.1
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "128Mi"   # Lowered request to allow scheduling
+              cpu: "100m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+          # --- FIXED PROBES (Use TCP Socket instead of HTTP) ---
+          livenessProbe:
+            failureThreshold: 5
+            tcpSocket:          # Check if port is open, not URL
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            failureThreshold: 5
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
 
 ---
 # PDF Converter Service
@@ -46,9 +78,9 @@ spec:
   selector:
     app: pdf-converter
   ports:
-  - protocol: TCP
-    port: 8080
-    targetPort: 8080
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
   type: ClusterIP
 
 ---
@@ -67,19 +99,51 @@ spec:
     metadata:
       labels:
         app: ipynb-converter
+        project: sds-demo    # <--- NEW
     spec:
+      nodeSelector:
+        node-type: worker
+      tolerations:
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              project: sds-demo # <--- NEW
       containers:
-      - name: ipynb-converter
-        image: kanisornp/sds-project-html-converter:1.1
-        ports:
-        - containerPort: 5001
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: ipynb-converter
+          image: kanisornp/sds-project-html-converter:1.1
+          ports:
+            - containerPort: 5001
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+          # --- FIXED PROBES ---
+          livenessProbe:
+            failureThreshold: 5
+            tcpSocket:
+              port: 5001
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            failureThreshold: 5
+            tcpSocket:
+              port: 5001
+            initialDelaySeconds: 20
+            periodSeconds: 10
 
 ---
 # IPYNB Converter Service
@@ -92,9 +156,9 @@ spec:
   selector:
     app: ipynb-converter
   ports:
-  - protocol: TCP
-    port: 5001
-    targetPort: 5001
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001
   type: ClusterIP
 
 ---
@@ -105,7 +169,7 @@ metadata:
   name: gateway
   namespace: sds-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: gateway
@@ -113,24 +177,56 @@ spec:
     metadata:
       labels:
         app: gateway
+        project: sds-demo    # <--- NEW
     spec:
+      nodeSelector:
+        node-type: worker
+      tolerations:
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              project: sds-demo # <--- NEW
       containers:
-      - name: gateway
-        image: kanisornp/sds-project-gateway:1.2
-        ports:
-        - containerPort: 3000
-        env:
-        - name: IPYNB_SERVICE
-          value: "http://ipynb-converter:5001"
-        - name: PDF_SERVICE
-          value: "http://pdf-converter:8080"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: gateway
+          image: kanisornp/sds-project-gateway:1.2
+          ports:
+            - containerPort: 3000
+          env:
+            - name: IPYNB_SERVICE
+              value: "http://ipynb-converter:5001"
+            - name: PDF_SERVICE
+              value: "http://pdf-converter:8080"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # --- FIXED PROBES ---
+          livenessProbe:
+            failureThreshold: 5
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            failureThreshold: 5
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
 
 ---
 # Gateway Service
@@ -143,9 +239,9 @@ spec:
   selector:
     app: gateway
   ports:
-  - protocol: TCP
-    port: 3000
-    targetPort: 3000
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
   type: ClusterIP
 
 ---
@@ -156,7 +252,7 @@ metadata:
   name: frontend
   namespace: sds-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -164,22 +260,57 @@ spec:
     metadata:
       labels:
         app: frontend
+        project: sds-demo    # <--- NEW
     spec:
+      nodeSelector:
+        node-type: worker
+      tolerations:
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              project: sds-demo # <--- NEW
       containers:
-      - name: frontend
-        image: kanisornp/sds-project-frontend:1.2
-        ports:
-        - containerPort: 80
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
+        - name: frontend
+          image: kanisornp/sds-project-frontend:1.2
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Frontend usually serves HTML at /, so httpGet is okay here, 
+          # but tcpSocket is safer if you aren't sure.
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
 
 ---
-# Frontend Service (LoadBalancer for external access)
+# Frontend Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -189,31 +320,27 @@ spec:
   selector:
     app: frontend
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  # type: LoadBalancer
+    - protocol: TCP
+      port: 80
+      targetPort: 80
   type: ClusterIP
 
 ---
-# Ingress (Optional - alternative to LoadBalancer)
-# Uncomment if you prefer using an Ingress Controller
+# Ingress for Frontend
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend-ingress
   namespace: sds-project
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend
-            port:
-              number: 80
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
