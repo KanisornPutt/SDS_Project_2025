@@ -38,7 +38,7 @@ chmod +X patch.sh
 ./patch.sh
 ```
 
-## Copy Image of the Services to PIs
+## Copy Image of the Services to PIs (Optional)
 To reduce container's building time 
 
 ```sh
