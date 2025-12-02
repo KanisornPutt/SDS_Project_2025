@@ -126,3 +126,5 @@ HTML→PDF Service (Port 8080, Go)
     ↓
 API Gateway → User (PDF download)
 ```
+
+![image](https://github.com/user-attachments/assets/3376a8d9-4e2b-4c28-b888-8a840f2dd10b)
